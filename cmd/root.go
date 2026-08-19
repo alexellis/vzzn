@@ -49,18 +49,20 @@ var (
 func MakeRoot() *cobra.Command {
 	root := &cobra.Command{
 		Use:   "vzzn IMAGE [PROMPT ...]",
-		Short: "Lean vision/OCR client for the toilgate gateway",
-		Long: `vzzn sends one multimodal chat completion to the toilgate gateway and
-streams the answer to stdout. Endpoints come from the local opencode
-configuration; credentials from opencode's stored toilgate token.
+		Short: "Lean vision/OCR client for an LLM gateway",
+		Long: `vzzn sends one multimodal chat completion to an OpenAI-compatible
+gateway and streams the answer to stdout. By default endpoints and
+credentials come from the local opencode configuration; a ~/.vzzn/config.json
+can set url, model and token directly to point at another gateway.
 
 With no subcommand, IMAGE is described (or described with a custom PROMPT).
 The ocr subcommand transcribes text literally and accepts one or more
 images; the label subcommand writes an annotated copy of a single image
 with object boxes and labels.
 
-~/.vzzn/config.json optionally overrides the model; ~/.vzzn/token.json
-caches vzzn's own access token.`,
+~/.vzzn/config.json optionally overrides url, model and token;
+~/.vzzn/token.json caches vzzn's own access token when using the
+opencode path.`,
 		// Override cobra's default validation, which would otherwise reject
 		// positional args on a root command that also has subcommands. This
 		// lets "vzzn IMAGE" fall through to describe while "vzzn ocr IMAGE"
