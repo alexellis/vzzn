@@ -12,7 +12,7 @@ import (
 	"strings"
 )
 
-// Config mirrors the subset of opencode.json that vzn needs.
+// Config mirrors the subset of opencode.json that vzzn needs.
 type Config struct {
 	Model    string              `json:"model"`
 	Provider map[string]Provider `json:"provider"`
@@ -54,20 +54,20 @@ func Load() (*Config, error) {
 	return &c, nil
 }
 
-// Local is vzn's own optional override file at ~/.vzn/config.json. Every
+// Local is vzzn's own optional override file at ~/.vzzn/config.json. Every
 // field is optional; opencode.json remains the source of truth upstream of
 // any override.
 type Local struct {
 	Model string `json:"model"`
 }
 
-// LoadLocal reads ~/.vzn/config.json, tolerating its absence.
+// LoadLocal reads ~/.vzzn/config.json, tolerating its absence.
 func LoadLocal() (*Local, error) {
 	home, err := os.UserHomeDir()
 	if err != nil {
 		return nil, err
 	}
-	p := filepath.Join(home, ".vzn", "config.json")
+	p := filepath.Join(home, ".vzzn", "config.json")
 	raw, err := os.ReadFile(p)
 	if err != nil {
 		if os.IsNotExist(err) {

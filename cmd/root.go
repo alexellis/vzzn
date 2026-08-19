@@ -1,4 +1,4 @@
-// Package cmd holds the vzn cobra command tree: the describe command (root)
+// Package cmd holds the vzzn cobra command tree: the describe command (root)
 // with the ocr, label and version subcommands, and the shared completion path.
 // Version/build metadata (Version, GitCommit) is injected into this package at
 // build time via -ldflags -X — see the Makefile and version.go.
@@ -44,13 +44,13 @@ var (
 	stream     bool
 )
 
-// MakeRoot assembles the vzn command tree: the describe command (root) with
+// MakeRoot assembles the vzzn command tree: the describe command (root) with
 // the ocr, label and version subcommands, and the shared persistent flags.
 func MakeRoot() *cobra.Command {
 	root := &cobra.Command{
-		Use:   "vzn IMAGE [PROMPT ...]",
+		Use:   "vzzn IMAGE [PROMPT ...]",
 		Short: "Lean vision/OCR client for the toilgate gateway",
-		Long: `vzn sends one multimodal chat completion to the toilgate gateway and
+		Long: `vzzn sends one multimodal chat completion to the toilgate gateway and
 streams the answer to stdout. Endpoints come from the local opencode
 configuration; credentials from opencode's stored toilgate token.
 
@@ -59,11 +59,11 @@ The ocr subcommand transcribes text literally and accepts one or more
 images; the label subcommand writes an annotated copy of a single image
 with object boxes and labels.
 
-~/.vzn/config.json optionally overrides the model; ~/.vzn/token.json
-caches vzn's own access token.`,
+~/.vzzn/config.json optionally overrides the model; ~/.vzzn/token.json
+caches vzzn's own access token.`,
 		// Override cobra's default validation, which would otherwise reject
 		// positional args on a root command that also has subcommands. This
-		// lets "vzn IMAGE" fall through to describe while "vzn ocr IMAGE"
+		// lets "vzzn IMAGE" fall through to describe while "vzzn ocr IMAGE"
 		// routes to the ocr subcommand.
 		Args: cobra.MinimumNArgs(1),
 		RunE: describe,

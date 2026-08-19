@@ -1,12 +1,12 @@
 #!/bin/bash
 
 # Repo-specific content: the repo is `vision`; the distributed binary and
-# installed command is `vzn`. URLs use REPO, asset filenames and the install
+# installed command is `vzzn`. URLs use REPO, asset filenames and the install
 # name use BIN.
 export VERIFY_CHECKSUM=0
 export OWNER=alexellis
 export REPO=vision
-export BIN=vzn
+export BIN=vzzn
 export BINLOCATION="/usr/local/bin"
 export SUCCESS_CMD="$BINLOCATION/$BIN version"
 

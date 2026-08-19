@@ -18,13 +18,13 @@ gofmt:
 .PHONY: dist
 dist:
 	mkdir -p bin/
-	rm -rf bin/vzn*
-	CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -ldflags $(LDFLAGS) -o bin/vzn
-	GOARM=7 GOARCH=arm CGO_ENABLED=0 GOOS=linux go build -ldflags $(LDFLAGS) -o bin/vzn-armhf
-	GOARCH=arm64 CGO_ENABLED=0 GOOS=linux go build -ldflags $(LDFLAGS) -o bin/vzn-arm64
-	CGO_ENABLED=0 GOOS=darwin go build -ldflags $(LDFLAGS) -o bin/vzn-darwin
-	GOARCH=arm64 CGO_ENABLED=0 GOOS=darwin go build -ldflags $(LDFLAGS) -o bin/vzn-darwin-arm64
-	GOOS=windows CGO_ENABLED=0 go build -ldflags $(LDFLAGS) -o bin/vzn.exe
+	rm -rf bin/vzzn*
+	CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -ldflags $(LDFLAGS) -o bin/vzzn
+	GOARM=7 GOARCH=arm CGO_ENABLED=0 GOOS=linux go build -ldflags $(LDFLAGS) -o bin/vzzn-armhf
+	GOARCH=arm64 CGO_ENABLED=0 GOOS=linux go build -ldflags $(LDFLAGS) -o bin/vzzn-arm64
+	CGO_ENABLED=0 GOOS=darwin go build -ldflags $(LDFLAGS) -o bin/vzzn-darwin
+	GOARCH=arm64 CGO_ENABLED=0 GOOS=darwin go build -ldflags $(LDFLAGS) -o bin/vzzn-darwin-arm64
+	GOOS=windows CGO_ENABLED=0 go build -ldflags $(LDFLAGS) -o bin/vzzn.exe
 
 .PHONY: hash
 hash:

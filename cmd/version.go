@@ -17,7 +17,7 @@ var (
 func MakeVersion() *cobra.Command {
 	var command = &cobra.Command{
 		Use:   "version",
-		Short: "Print vzn version and build metadata",
+		Short: "Print vzzn version and build metadata",
 	}
 	command.Run = func(cmd *cobra.Command, args []string) {
 		if len(Version) == 0 {

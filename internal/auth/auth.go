@@ -3,9 +3,9 @@
 // toilgate's refresh tokens are stateless (verified with the gateway): they
 // never rotate and are valid for ~90 days, so opencode's auth store — the
 // well-known ~/.local/share/opencode/auth.json — is treated as a read-only
-// seed. vzn reads the toilgate refresh token from it, mints its own short-
+// seed. vzzn reads the toilgate refresh token from it, mints its own short-
 // lived access tokens through the token endpoint, and caches those in its
-// own state file under ~/.vzn/. It never writes to opencode's store.
+// own state file under ~/.vzzn/. It never writes to opencode's store.
 package auth
 
 import (
@@ -18,13 +18,13 @@ import (
 	"time"
 )
 
-// seedEntry mirrors the fields of opencode's toilgate auth entry that vzn
+// seedEntry mirrors the fields of opencode's toilgate auth entry that vzzn
 // needs.
 type seedEntry struct {
 	Refresh string `json:"refresh"`
 }
 
-// state is vzn's own cached access token.
+// state is vzzn's own cached access token.
 type state struct {
 	Access  string `json:"access"`
 	Expires int64  `json:"expires"` // unix milliseconds
@@ -67,13 +67,13 @@ func readSeed() (string, error) {
 	return top.Toilgate.Refresh, nil
 }
 
-// statePath returns vzn's own state location under ~/.vzn/.
+// statePath returns vzzn's own state location under ~/.vzzn/.
 func statePath() (string, error) {
 	home, err := os.UserHomeDir()
 	if err != nil {
 		return "", err
 	}
-	return filepath.Join(home, ".vzn", "token.json"), nil
+	return filepath.Join(home, ".vzzn", "token.json"), nil
 }
 
 func loadState() *state {
@@ -104,7 +104,7 @@ func saveState(s *state) error {
 	if err != nil {
 		return err
 	}
-	tmp, err := os.CreateTemp(filepath.Dir(p), ".vzn-token.json.tmp.*")
+	tmp, err := os.CreateTemp(filepath.Dir(p), ".vzzn-token.json.tmp.*")
 	if err != nil {
 		return err
 	}

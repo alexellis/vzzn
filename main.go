@@ -1,4 +1,4 @@
-// Command vzn is a lean vision/OCR client for the toilgate gateway.
+// Command vzzn is a lean vision/OCR client for the toilgate gateway.
 //
 // Thin entrypoint: assembles and executes the cobra command tree defined in
 // the cmd package. Version/build metadata is injected into the cmd package at
@@ -17,7 +17,7 @@ func main() {
 	root.SilenceUsage = true
 	root.SilenceErrors = true
 	if err := root.Execute(); err != nil {
-		fmt.Fprintln(os.Stderr, "vzn:", err)
+		fmt.Fprintln(os.Stderr, "vzzn:", err)
 		os.Exit(1)
 	}
 }
