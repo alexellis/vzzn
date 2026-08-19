@@ -1,6 +1,6 @@
 Version := $(shell git describe --tags --dirty)
 GitCommit := $(shell git rev-parse HEAD)
-LDFLAGS := "-s -w -X github.com/alexellis/vision/cmd.Version=$(Version) -X github.com/alexellis/vision/cmd.GitCommit=$(GitCommit)"
+LDFLAGS := "-s -w -X github.com/alexellis/vzzn/cmd.Version=$(Version) -X github.com/alexellis/vzzn/cmd.GitCommit=$(GitCommit)"
 export GO111MODULE=on
 SOURCE_DIRS = main.go cmd internal
 

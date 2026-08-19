@@ -9,7 +9,7 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/alexellis/vision/cmd"
+	"github.com/alexellis/vzzn/cmd"
 )
 
 func main() {

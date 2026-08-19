@@ -1,4 +1,4 @@
-module github.com/alexellis/vision
+module github.com/alexellis/vzzn
 
 go 1.26
 

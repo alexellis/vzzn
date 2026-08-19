@@ -10,7 +10,7 @@ import (
 
 	"github.com/spf13/cobra"
 
-	"github.com/alexellis/vision/internal/annotate"
+	"github.com/alexellis/vzzn/internal/annotate"
 )
 
 const labelPrompt = "Detect every distinct object and person in this image. Respond with ONLY a JSON object of the form {\"objects\":[{\"label\":\"<short noun>\",\"box\":[x0,y0,x1,y1]}]} where box corners are integers normalized to 0-1000 against the image's width and height (x0,y0 = top-left, x1,y1 = bottom-right). No prose, no markdown, no commentary."

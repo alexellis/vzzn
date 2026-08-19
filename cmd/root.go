@@ -15,9 +15,9 @@ import (
 
 	"github.com/spf13/cobra"
 
-	"github.com/alexellis/vision/internal/auth"
-	"github.com/alexellis/vision/internal/config"
-	"github.com/alexellis/vision/internal/gateway"
+	"github.com/alexellis/vzzn/internal/auth"
+	"github.com/alexellis/vzzn/internal/config"
+	"github.com/alexellis/vzzn/internal/gateway"
 )
 
 const (
