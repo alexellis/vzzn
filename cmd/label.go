@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"fmt"
 	"image"
+	_ "image/jpeg"
 	"image/png"
 	"io"
 	"os"
@@ -59,6 +60,7 @@ func runLabel(imgPath, out string) error {
 	if err != nil {
 		return fmt.Errorf("decoding %s: %w", imgPath, err)
 	}
+	src = annotate.ApplyOrientation(src, annotate.ReadOrientation(raw))
 	annotated := annotate.Render(src, boxes)
 
 	var w io.Writer
@@ -75,7 +77,13 @@ func runLabel(imgPath, out string) error {
 		defer f.Close()
 		w = f
 	}
-	return png.Encode(w, annotated)
+	if err := png.Encode(w, annotated); err != nil {
+		return err
+	}
+	if out != "-" {
+		fmt.Fprintf(os.Stderr, "wrote %s\n", out)
+	}
+	return nil
 }
 
 func defaultLabelOut(imgPath string) string {

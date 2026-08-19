@@ -31,8 +31,8 @@ const (
 	// tasks skip the thinking block entirely (no latency, no quality cost).
 	minimalEffort = "minimal"
 
-	// toilgate parses up to 32MB to extract the model id; keep the encoded
-	// body comfortably under that.
+	// the gateway parses up to 32MB to extract the model id; keep the
+	// encoded body comfortably under that.
 	maxImageBytes = 22 << 20
 )
 
@@ -102,7 +102,7 @@ func completeMulti(imgPaths []string, prompt, reasoningDefault string, out, prog
 		totalRaw += int64(len(raw))
 	}
 	if totalRaw*4/3 > maxImageBytes {
-		return fmt.Errorf("images total %d bytes; encoded body would exceed the 32MB toilgate limit — downscale them first", totalRaw)
+		return fmt.Errorf("images total %d bytes; encoded body would exceed the gateway's 32MB request limit — downscale them first", totalRaw)
 	}
 
 	cfg, err := config.Load()

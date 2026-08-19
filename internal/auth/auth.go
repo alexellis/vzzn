@@ -1,11 +1,12 @@
 // Package auth piggybacks on opencode's stored toilgate credentials.
 //
-// toilgate's refresh tokens are stateless (verified with the gateway): they
-// never rotate and are valid for ~90 days, so opencode's auth store — the
-// well-known ~/.local/share/opencode/auth.json — is treated as a read-only
-// seed. vzzn reads the toilgate refresh token from it, mints its own short-
-// lived access tokens through the token endpoint, and caches those in its
-// own state file under ~/.vzzn/. It never writes to opencode's store.
+// toilgate refresh tokens are valid for an undefined period and can be
+// revoked or refreshed by a toilgate administrator; they are read from
+// opencode's auth store — the well-known ~/.local/share/opencode/auth.json —
+// which is treated as a read-only seed. vzzn reads the refresh token from it,
+// mints its own short-lived access tokens through the token endpoint, and
+// caches those in its own state file under ~/.vzzn/. It never writes to
+// opencode's store.
 package auth
 
 import (
