@@ -54,11 +54,14 @@ func Load() (*Config, error) {
 	return &c, nil
 }
 
-// Local is vzzn's own optional override file at ~/.vzzn/config.json. Every
-// field is optional; opencode.json remains the source of truth upstream of
-// any override.
+// Local is vzzn's own optional override file at ~/.vzzn/config.json. When
+// url and token are set they fully take over from opencode's config and auth
+// store; when only model is set, the endpoint and credentials still come from
+// opencode. opencode.json remains the source of truth upstream of any override.
 type Local struct {
+	URL   string `json:"url"`
 	Model string `json:"model"`
+	Token string `json:"token"`
 }
 
 // LoadLocal reads ~/.vzzn/config.json, tolerating its absence.

@@ -105,17 +105,28 @@ func completeMulti(imgPaths []string, prompt, reasoningDefault string, out, prog
 		return fmt.Errorf("images total %d bytes; encoded body would exceed the gateway's 32MB request limit — downscale them first", totalRaw)
 	}
 
-	cfg, err := config.Load()
+	local, err := config.LoadLocal()
 	if err != nil {
 		return err
 	}
-	baseURL, tokenURL, err := config.Resolve(cfg, provider)
-	if err != nil {
-		return err
-	}
-	token, err := auth.Token(tokenURL)
-	if err != nil {
-		return err
+
+	var baseURL, token, tokenURL string
+	if local.URL != "" {
+		baseURL = strings.TrimSuffix(local.URL, "/")
+		token = local.Token
+	} else {
+		cfg, err := config.Load()
+		if err != nil {
+			return err
+		}
+		baseURL, tokenURL, err = config.Resolve(cfg, provider)
+		if err != nil {
+			return err
+		}
+		token, err = auth.Token(tokenURL)
+		if err != nil {
+			return err
+		}
 	}
 
 	parts := make([]gateway.Part, 0, len(imgPaths)+1)
@@ -136,10 +147,6 @@ func completeMulti(imgPaths []string, prompt, reasoningDefault string, out, prog
 			Role:    "user",
 			Content: parts,
 		}},
-	}
-	local, err := config.LoadLocal()
-	if err != nil {
-		return err
 	}
 	if req.Model == "" {
 		if local.Model != "" {
