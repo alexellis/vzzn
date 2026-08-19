@@ -1,0 +1,180 @@
+// Package cmd holds the vzn cobra command tree: the describe command (root)
+// with the ocr, label and version subcommands, and the shared completion path.
+// Version/build metadata (Version, GitCommit) is injected into this package at
+// build time via -ldflags -X — see the Makefile and version.go.
+package cmd
+
+import (
+	"encoding/base64"
+	"fmt"
+	"io"
+	"os"
+	"path/filepath"
+	"strings"
+	"time"
+
+	"github.com/spf13/cobra"
+
+	"github.com/alexellis/vision/internal/auth"
+	"github.com/alexellis/vision/internal/config"
+	"github.com/alexellis/vision/internal/gateway"
+)
+
+const (
+	defaultProvider = "toilgate"
+	defaultModel    = "Qwen3.8-27B-FP8-vllm"
+	defaultTimeout  = 60 * time.Second
+
+	describePrompt = "Describe this image in detail."
+
+	// minimalEffort sets enable_thinking:false server-side: verbatim/structured
+	// tasks skip the thinking block entirely (no latency, no quality cost).
+	minimalEffort = "minimal"
+
+	// toilgate parses up to 32MB to extract the model id; keep the encoded
+	// body comfortably under that.
+	maxImageBytes = 22 << 20
+)
+
+var (
+	model      string
+	provider   string
+	reasoning  string
+	timeoutDur time.Duration
+	stream     bool
+)
+
+// MakeRoot assembles the vzn command tree: the describe command (root) with
+// the ocr, label and version subcommands, and the shared persistent flags.
+func MakeRoot() *cobra.Command {
+	root := &cobra.Command{
+		Use:   "vzn IMAGE [PROMPT ...]",
+		Short: "Lean vision/OCR client for the toilgate gateway",
+		Long: `vzn sends one multimodal chat completion to the toilgate gateway and
+streams the answer to stdout. Endpoints come from the local opencode
+configuration; credentials from opencode's stored toilgate token.
+
+With no subcommand, IMAGE is described (or described with a custom PROMPT).
+The ocr subcommand transcribes text literally and accepts one or more
+images; the label subcommand writes an annotated copy of a single image
+with object boxes and labels.
+
+~/.vzn/config.json optionally overrides the model; ~/.vzn/token.json
+caches vzn's own access token.`,
+		// Override cobra's default validation, which would otherwise reject
+		// positional args on a root command that also has subcommands. This
+		// lets "vzn IMAGE" fall through to describe while "vzn ocr IMAGE"
+		// routes to the ocr subcommand.
+		Args: cobra.MinimumNArgs(1),
+		RunE: describe,
+	}
+	pf := root.PersistentFlags()
+	pf.StringVar(&model, "model", "", "model id")
+	pf.StringVar(&provider, "provider", defaultProvider, "opencode config provider")
+	pf.StringVar(&reasoning, "reasoning", "", "reasoning_effort override (minimal|low|medium|high|xhigh)")
+	pf.DurationVarP(&timeoutDur, "timeout", "t", defaultTimeout, "overall deadline including retries")
+	pf.BoolVar(&stream, "stream", true, "stream the answer (disable to buffer the full completion)")
+	root.AddCommand(MakeOCR(), MakeLabel(), MakeVersion())
+	return root
+}
+
+func describe(cmd *cobra.Command, args []string) error {
+	prompt := describePrompt
+	if len(args) >= 2 {
+		prompt = strings.Join(args[1:], " ")
+	}
+	return run(args[0], prompt, "")
+}
+
+func run(imgPath, prompt, reasoningDefault string) error {
+	return completeMulti([]string{imgPath}, prompt, reasoningDefault, os.Stdout, os.Stderr, timeoutDur)
+}
+
+func completeMulti(imgPaths []string, prompt, reasoningDefault string, out, progress io.Writer, timeout time.Duration) error {
+	raws := make([][]byte, len(imgPaths))
+	var totalRaw int64
+	for i, p := range imgPaths {
+		raw, err := readImage(p)
+		if err != nil {
+			return err
+		}
+		raws[i] = raw
+		totalRaw += int64(len(raw))
+	}
+	if totalRaw*4/3 > maxImageBytes {
+		return fmt.Errorf("images total %d bytes; encoded body would exceed the 32MB toilgate limit — downscale them first", totalRaw)
+	}
+
+	cfg, err := config.Load()
+	if err != nil {
+		return err
+	}
+	baseURL, tokenURL, err := config.Resolve(cfg, provider)
+	if err != nil {
+		return err
+	}
+	token, err := auth.Token(tokenURL)
+	if err != nil {
+		return err
+	}
+
+	parts := make([]gateway.Part, 0, len(imgPaths)+1)
+	parts = append(parts, gateway.Part{Type: "text", Text: prompt})
+	for i, p := range imgPaths {
+		parts = append(parts, gateway.Part{
+			Type: "image_url",
+			ImageURL: &gateway.ImageURL{
+				URL: "data:" + mime(p) + ";base64," + base64.StdEncoding.EncodeToString(raws[i]),
+			},
+		})
+	}
+
+	req := gateway.Request{
+		Model:  model,
+		Stream: stream,
+		Messages: []gateway.Message{{
+			Role:    "user",
+			Content: parts,
+		}},
+	}
+	local, err := config.LoadLocal()
+	if err != nil {
+		return err
+	}
+	if req.Model == "" {
+		if local.Model != "" {
+			req.Model = local.Model
+		} else {
+			req.Model = defaultModel
+		}
+	}
+	if reasoning != "" {
+		req.ReasoningEffort = reasoning
+	} else if reasoningDefault != "" {
+		req.ReasoningEffort = reasoningDefault
+	}
+
+	return gateway.Complete(baseURL, token, req, out, progress, timeout)
+}
+
+func readImage(name string) ([]byte, error) {
+	if name == "-" {
+		return io.ReadAll(os.Stdin)
+	}
+	return os.ReadFile(name)
+}
+
+func mime(name string) string {
+	switch strings.ToLower(filepath.Ext(name)) {
+	case ".jpg", ".jpeg":
+		return "image/jpeg"
+	case ".webp":
+		return "image/webp"
+	case ".gif":
+		return "image/gif"
+	case ".bmp":
+		return "image/bmp"
+	default:
+		return "image/png"
+	}
+}
