@@ -42,6 +42,7 @@ var (
 	reasoning  string
 	timeoutDur time.Duration
 	stream     bool
+	prompt     string
 )
 
 // MakeRoot assembles the vzzn command tree: the describe command (root) with
@@ -60,6 +61,9 @@ The ocr subcommand transcribes text literally and accepts one or more
 images; the label subcommand writes an annotated copy of a single image
 with object boxes and labels.
 
+--prompt overrides the base prompt for any command; on the default
+describe command it takes precedence over a positional PROMPT.
+
 ~/.vzzn/config.json optionally overrides url, model and token;
 ~/.vzzn/token.json caches vzzn's own access token when using the
 opencode path.`,
@@ -76,16 +80,25 @@ opencode path.`,
 	pf.StringVar(&reasoning, "reasoning", "", "reasoning_effort override (minimal|low|medium|high|xhigh)")
 	pf.DurationVarP(&timeoutDur, "timeout", "t", defaultTimeout, "overall deadline including retries")
 	pf.BoolVar(&stream, "stream", true, "stream the answer (disable to buffer the full completion)")
+	pf.StringVar(&prompt, "prompt", "", "override the base prompt for the command")
 	root.AddCommand(MakeOCR(), MakeLabel(), MakeVersion())
 	return root
 }
 
-func describe(cmd *cobra.Command, args []string) error {
-	prompt := describePrompt
-	if len(args) >= 2 {
-		prompt = strings.Join(args[1:], " ")
+// selectPrompt returns the --prompt override when set, otherwise base.
+func selectPrompt(base string) string {
+	if prompt != "" {
+		return prompt
 	}
-	return run(args[0], prompt, "")
+	return base
+}
+
+func describe(cmd *cobra.Command, args []string) error {
+	p := describePrompt
+	if len(args) >= 2 {
+		p = strings.Join(args[1:], " ")
+	}
+	return run(args[0], selectPrompt(p), "")
 }
 
 func run(imgPath, prompt, reasoningDefault string) error {
