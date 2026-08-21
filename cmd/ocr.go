@@ -16,7 +16,7 @@ func MakeOCR() *cobra.Command {
 		Short: "Verbatim transcription of one or more images",
 		Args:  cobra.MinimumNArgs(1),
 		RunE: func(cmd *cobra.Command, args []string) error {
-			return completeMulti(args, ocrPrompt, minimalEffort, os.Stdout, os.Stderr, timeoutDur)
+			return completeMulti(args, selectPrompt(ocrPrompt), minimalEffort, os.Stdout, os.Stderr, timeoutDur)
 		},
 	}
 }

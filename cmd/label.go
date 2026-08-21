@@ -38,7 +38,7 @@ func MakeLabel() *cobra.Command {
 func runLabel(imgPath, out string) error {
 	var buf bytes.Buffer
 	// minimal: OCR/label are verbatim/structured tasks; skip thinking tokens.
-	if err := completeMulti([]string{imgPath}, labelPrompt, minimalEffort, &buf, os.Stderr, timeoutDur); err != nil {
+	if err := completeMulti([]string{imgPath}, selectPrompt(labelPrompt), minimalEffort, &buf, os.Stderr, timeoutDur); err != nil {
 		return err
 	}
 	boxes, err := annotate.Parse(buf.String())
